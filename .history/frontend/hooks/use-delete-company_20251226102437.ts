@@ -1,0 +1,4 @@
+
+const useDeleteCompany = () => {
+    return useM   
+}
