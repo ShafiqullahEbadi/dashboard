@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Logo from "@/components/logo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import useLogin from "@/hooks/useLogin";
@@ -25,9 +24,6 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gray-50 dark:bg-slate-900">
       <div className="w-full max-w-md md:max-w-lg lg:max-w-xl bg-base-100 rounded-xl shadow-lg overflow-hidden border border-primary/25 p-6 sm:p-8 lg:p-10">
         {/* Logo */}
-        <div className="mb-6 flex items-center justify-center rounded-2xl bg-accent-foreground p-3 gap-2">
-          <Logo />
-        </div>
 
         {/* Error/Success Messages */}
         {loginMutation.error && (
