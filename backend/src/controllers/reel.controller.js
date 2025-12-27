@@ -3,7 +3,7 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const getReelController = async (req, res) => {
   try {
-    const reels = await Reel.find().sort({createdAt: -1});
+    const reels = await Reel.find().sort({_id: -1});
     res.status(200).json(reels);
   } catch (error) {
     console.error(error);

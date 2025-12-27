@@ -3,7 +3,7 @@ import cloudinary from "../lib/cloudinary.js";
 
 export async function getProjects(req, res) {
   try {
-    const projects = await Project.find().sort({createdAt: -1});
+    const projects = await Project.find().sort({_id: -1});
     res.status(200).send(projects);
   } catch (error) {
     console.error("Error in getProjects Controller:", error.message);
