@@ -36,7 +36,7 @@ export const addExperienceController = async (req, res) => {
 
 export const getAllExperienceController = async (req, res) => {
   try {
-    const experiences = await Experience.find();
+    const experiences = await Experience.find().sort({createdAt: -1});
     res.status(200).json(experiences);
   } catch (error) {
     console.log(error);
