@@ -114,8 +114,8 @@ const ReelPage: React.FC = () => {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Motion Reel</h1>
-        <Button onClick={openAdd} disabled={hasReel}>
-          {hasReel ? "Reel Already Exists" : "Add New Reel"}
+        <Button onClick={openAdd}>
+          Add New Reel
         </Button>
       </div>
 
