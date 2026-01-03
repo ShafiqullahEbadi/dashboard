@@ -198,7 +198,7 @@ const ReelPage: React.FC = () => {
         { open: isDeleteOpen, setOpen: setIsDeleteOpen, title: "Confirm Delete", onSave: handleDelete },
       ].map(({ open, setOpen, title, onSave }, idx) => (
         <Dialog key={idx} open={open} onOpenChange={setOpen}>
-          <DialogContent>
+          <DialogContent className="space-y-4 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
             </DialogHeader>
@@ -219,6 +219,7 @@ const ReelPage: React.FC = () => {
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
+                  className="resize-none" // optional
                 />
 
                 <Input
