@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ const ReelPage: React.FC = () => {
     description: "",
   });
 
+  // OPEN DIALOGS
   const openAdd = () => {
     setForm({ title: "", video: null, thumbnail: null, description: "" });
     setIsAddOpen(true);
@@ -72,6 +74,7 @@ const ReelPage: React.FC = () => {
     setIsDeleteOpen(true);
   };
 
+  // HANDLERS
   const handleAdd = () => {
     if (!form.title || !form.video || !form.thumbnail) return;
 
@@ -137,6 +140,7 @@ const ReelPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {reels?.map((reel: Reel) => (
           <Card key={reel._id} className="p-4 space-y-3">
+            {/* PLAYABLE THUMBNAIL */}
             <div className="aspect-video rounded overflow-hidden bg-black relative">
               {playingId === reel._id ? (
                 <video
@@ -153,6 +157,8 @@ const ReelPage: React.FC = () => {
                     alt={reel.title}
                     className="w-full h-full object-cover"
                   />
+
+                  {/* Play overlay */}
                   <button
                     onClick={() => setPlayingId(reel._id)}
                     className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition"
@@ -166,6 +172,7 @@ const ReelPage: React.FC = () => {
             </div>
 
             <h3 className="font-semibold">{reel.title}</h3>
+
             {reel.description && (
               <p className="text-gray-600 text-sm">{reel.description}</p>
             )}
@@ -188,61 +195,84 @@ const ReelPage: React.FC = () => {
 
       {/* DIALOGS */}
       {[
-        { open: isAddOpen, setOpen: setIsAddOpen, title: "Add Reel", onSave: handleAdd },
-        { open: isEditOpen, setOpen: setIsEditOpen, title: "Edit Reel", onSave: handleUpdate },
-        { open: isDeleteOpen, setOpen: setIsDeleteOpen, title: "Confirm Delete", onSave: handleDelete },
+        {
+          open: isAddOpen,
+          setOpen: setIsAddOpen,
+          title: "Add Reel",
+          onSave: handleAdd,
+        },
+        {
+          open: isEditOpen,
+          setOpen: setIsEditOpen,
+          title: "Edit Reel",
+          onSave: handleUpdate,
+        },
+        {
+          open: isDeleteOpen,
+          setOpen: setIsDeleteOpen,
+          title: "Confirm Delete",
+          onSave: handleDelete,
+        },
       ].map(({ open, setOpen, title, onSave }, idx) => (
         <Dialog key={idx} open={open} onOpenChange={setOpen}>
-  <DialogContent className="w-full max-w-md p-6 space-y-4">
-    <DialogHeader>
-      <DialogTitle>{title}</DialogTitle>
-      {/* Always render the description with an id */}
-      <DialogDescription id={`dialog-desc-${idx}`} className="text-sm text-gray-500">
-        {title === "Confirm Delete"
-          ? `Are you sure you want to delete "${selectedReel?.title}"?`
-          : "Fill out the details below"}
-      </DialogDescription>
-    </DialogHeader>
+          <DialogContent className="w-full max-w-md p-6 space-y-4">
+            <DialogHeader>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription className="text-gray-500 text-sm">
+                {title === "Confirm Delete"
+                  ? `Are you sure you want to delete "${selectedReel?.title}"?`
+                  : "Fill out the details below"}
+              </DialogDescription>
+            </DialogHeader>
 
-    {title !== "Confirm Delete" && (
-      <div aria-describedby={`dialog-desc-${idx}`} className="flex flex-col gap-4">
-        <Input
-          placeholder="Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
-        <Textarea
-          placeholder="Description"
-          value={form.description}
-          onChange={(e) =>
-            setForm({ ...form, description: e.target.value })
-          }
-        />
-        <Input
-          type="file"
-          accept="video/*"
-          onChange={(e) =>
-            setForm({ ...form, video: e.target.files?.[0] || null })
-          }
-        />
-        <Input
-          type="file"
-          accept="image/*"
-          onChange={(e) =>
-            setForm({ ...form, thumbnail: e.target.files?.[0] || null })
-          }
-        />
-      </div>
-    )}
+            {title !== "Confirm Delete" && (
+              <div className="flex flex-col gap-4">
+                <Input
+                  className="w-full"
+                  placeholder="Title"
+                  value={form.title}
+                  onChange={(e) =>
+                    setForm({ ...form, title: e.target.value })
+                  }
+                />
 
-    <DialogFooter className="flex gap-2 mt-4">
-      <Button variant="outline" onClick={() => setOpen(false)}>
-        Cancel
-      </Button>
-      <Button onClick={onSave}>{title === "Confirm Delete" ? "Delete" : "Save"}</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+                <Textarea
+                  className="w-full min-h-[80px]"
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                />
+
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) =>
+                    setForm({ ...form, video: e.target.files?.[0] || null })
+                  }
+                />
+
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setForm({ ...form, thumbnail: e.target.files?.[0] || null })
+                  }
+                />
+              </div>
+            )}
+
+            <DialogFooter className="flex gap-2 mt-4">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={onSave}>
+                {title === "Confirm Delete" ? "Delete" : "Save"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       ))}
     </div>
   );
