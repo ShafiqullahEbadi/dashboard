@@ -193,55 +193,56 @@ const ReelPage: React.FC = () => {
         { open: isDeleteOpen, setOpen: setIsDeleteOpen, title: "Confirm Delete", onSave: handleDelete },
       ].map(({ open, setOpen, title, onSave }, idx) => (
         <Dialog key={idx} open={open} onOpenChange={setOpen}>
-          <DialogContent className="w-full max-w-md p-6 space-y-4">
-            <DialogHeader>
-              <DialogTitle>{title}</DialogTitle>
-              <DialogDescription>
-                {title === "Confirm Delete"
-                  ? `Are you sure you want to delete "${selectedReel?.title}"?`
-                  : "Fill out the details below"}
-              </DialogDescription>
-            </DialogHeader>
+  <DialogContent className="w-full max-w-md p-6 space-y-4">
+    <DialogHeader>
+      <DialogTitle>{title}</DialogTitle>
+      {/* Always render the description with an id */}
+      <DialogDescription id={`dialog-desc-${idx}`} className="text-sm text-gray-500">
+        {title === "Confirm Delete"
+          ? `Are you sure you want to delete "${selectedReel?.title}"?`
+          : "Fill out the details below"}
+      </DialogDescription>
+    </DialogHeader>
 
-            {title !== "Confirm Delete" && (
-              <>
-                <Input
-                  placeholder="Title"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
-                <Textarea
-                  placeholder="Description"
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
-                />
-                <Input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) =>
-                    setForm({ ...form, video: e.target.files?.[0] || null })
-                  }
-                />
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setForm({ ...form, thumbnail: e.target.files?.[0] || null })
-                  }
-                />
-              </>
-            )}
+    {title !== "Confirm Delete" && (
+      <div aria-describedby={`dialog-desc-${idx}`} className="flex flex-col gap-4">
+        <Input
+          placeholder="Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+        <Textarea
+          placeholder="Description"
+          value={form.description}
+          onChange={(e) =>
+            setForm({ ...form, description: e.target.value })
+          }
+        />
+        <Input
+          type="file"
+          accept="video/*"
+          onChange={(e) =>
+            setForm({ ...form, video: e.target.files?.[0] || null })
+          }
+        />
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            setForm({ ...form, thumbnail: e.target.files?.[0] || null })
+          }
+        />
+      </div>
+    )}
 
-            <DialogFooter className="flex gap-2 mt-4">
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={onSave}>{title === "Confirm Delete" ? "Delete" : "Save"}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+    <DialogFooter className="flex gap-2 mt-4">
+      <Button variant="outline" onClick={() => setOpen(false)}>
+        Cancel
+      </Button>
+      <Button onClick={onSave}>{title === "Confirm Delete" ? "Delete" : "Save"}</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
       ))}
     </div>
   );
