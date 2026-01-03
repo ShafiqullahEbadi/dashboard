@@ -24,7 +24,7 @@ interface Reel {
   title: string;
   reel: string;
   thumbnail: string;
-  description?: string;
+  description: string;
 }
 
 const ReelPage: React.FC = () => {
