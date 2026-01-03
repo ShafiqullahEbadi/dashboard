@@ -1,6 +1,5 @@
 import { axiosInstance } from "@/lib/api-services";
 import { useMutation } from "@tanstack/react-query";
-import { reelData } from "./use-add-reel";
 
 const useUpdateReel = () => {
   return useMutation({
@@ -9,19 +8,21 @@ const useUpdateReel = () => {
       reelData,
     }: {
       reelId: string;
-      reelData: Partial<reelData>;
+      reelData: {
+        title?: string;
+        video?: File;
+        thumbnail?: File;
+      };
     }) => {
       const formData = new FormData();
       if (reelData.title) formData.append("title", reelData.title);
       if (reelData.video) formData.append("reel", reelData.video);
+      if (reelData.thumbnail)
+        formData.append("thumbnail", reelData.thumbnail);
 
       return axiosInstance
-        .put(`/reel/${reelId}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((res) => res.data);
+        .put(`/reel/${reelId}`, formData)
+        .then(res => res.data);
     },
   });
 };

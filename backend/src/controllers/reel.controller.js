@@ -14,37 +14,53 @@ export const getReelController = async (req, res) => {
 export const createReelController = async (req, res) => {
   try {
     const { title } = req.body;
-    const file = req.file;
+    const videoFile = req.files?.reel?.[0];
+    const thumbFile = req.files?.thumbnail?.[0];
 
-    if (!title || !file) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!title || !videoFile || !thumbFile) {
+      return res.status(400).json({
+        message: "Title, reel video, and thumbnail are required",
+      });
     }
 
-    const uploadResponse = cloudinary.uploader.upload_stream(
-      { resource_type: "video", folder: "reels", timeout: 120000 },
-      async (error, result) => {
-        if (error) {
-          console.error("Cloudinary Upload Error:", error);
-          return res.status(500).json({
-            message: "Cloudinary upload failed",
-            details: error.message,
-          });
-        }
+    // Upload video
+    const uploadVideo = () =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "video", folder: "reels" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(videoFile.buffer);
+      });
 
-        try {
-          const newReel = await Reel.create({
-            title,
-            reel: result.secure_url,
-          });
-          res.status(201).json(newReel);
-        } catch (dbError) {
-          console.error("Database Error in createReel:", dbError);
-          res.status(500).json({ message: "Failed to save reel to database" });
-        }
-      }
-    );
+    // Upload thumbnail
+    const uploadThumbnail = () =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image", folder: "reel-thumbnails" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(thumbFile.buffer);
+      });
 
-    uploadResponse.end(file.buffer);
+    const [videoResult, thumbResult] = await Promise.all([
+      uploadVideo(),
+      uploadThumbnail(),
+    ]);
+
+    const newReel = await Reel.create({
+      title,
+      reel: videoResult.secure_url,
+      thumbnail: thumbResult.secure_url,
+    });
+
+    res.status(201).json(newReel);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -54,54 +70,39 @@ export const createReelController = async (req, res) => {
 export const updateReelController = async (req, res) => {
   try {
     const { title } = req.body;
-    const file = req.file;
+    const videoFile = req.files?.reel?.[0];
+    const thumbFile = req.files?.thumbnail?.[0];
 
     const reel = await Reel.findById(req.params.id);
-    if (!reel) {
-      return res.status(404).json({ message: "Reel not found" });
-    }
+    if (!reel) return res.status(404).json({ message: "Reel not found" });
 
     if (title) reel.title = title;
 
-    if (file) {
-      const uploadResponse = cloudinary.uploader.upload_stream(
-        { resource_type: "video", folder: "reels", timeout: 120000 },
-        async (error, result) => {
-          if (error) {
-            console.error("Cloudinary Upload Error:", error);
-            return res.status(500).json({
-              message: "Cloudinary upload failed",
-              details: error.message,
-            });
-          }
+    if (videoFile) {
+      const videoUpload = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { resource_type: "video", folder: "reels" },
+          (err, result) => (err ? reject(err) : resolve(result))
+        ).end(videoFile.buffer);
+      });
 
-          try {
-            // Optional: delete old video from cloudinary
-            if (reel.reel) {
-              const publicId = reel.reel.split("/").pop().split(".")[0];
-              await cloudinary.uploader.destroy(`reels/${publicId}`, {
-                resource_type: "video",
-              });
-            }
-
-            reel.reel = result.secure_url;
-            await reel.save();
-            res.status(200).json(reel);
-          } catch (dbError) {
-            console.error("Database Error in updateReel:", dbError);
-            res
-              .status(500)
-              .json({ message: "Failed to update reel in database" });
-          }
-        }
-      );
-      uploadResponse.end(file.buffer);
-    } else {
-      await reel.save();
-      res.status(200).json(reel);
+      reel.reel = videoUpload.secure_url;
     }
+
+    if (thumbFile) {
+      const thumbUpload = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { resource_type: "image", folder: "reel-thumbnails" },
+          (err, result) => (err ? reject(err) : resolve(result))
+        ).end(thumbFile.buffer);
+      });
+
+      reel.thumbnail = thumbUpload.secure_url;
+    }
+
+    await reel.save();
+    res.status(200).json(reel);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };

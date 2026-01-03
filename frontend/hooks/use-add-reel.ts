@@ -1,25 +1,21 @@
 import { axiosInstance } from "@/lib/api-services";
 import { useMutation } from "@tanstack/react-query";
 
-export type reelData = {
+export type ReelCreateData = {
   title: string;
   video: File;
+  thumbnail: File;
 };
 
 const useAddReel = () => {
   return useMutation({
-    mutationFn: (reelData: reelData) => {
+    mutationFn: (data: ReelCreateData) => {
       const formData = new FormData();
-      formData.append("title", reelData.title);
-      formData.append("reel", reelData.video);
+      formData.append("title", data.title);
+      formData.append("reel", data.video);
+      formData.append("thumbnail", data.thumbnail);
 
-      return axiosInstance
-        .post("/reel", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((res) => res.data);
+      return axiosInstance.post("/reel", formData).then(res => res.data);
     },
   });
 };

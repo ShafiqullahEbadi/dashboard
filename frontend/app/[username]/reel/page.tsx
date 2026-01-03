@@ -20,6 +20,7 @@ interface Reel {
   _id: string;
   title: string;
   reel: string;
+  thumbnail: string;
 }
 
 const ReelPage: React.FC = () => {
@@ -37,25 +38,21 @@ const ReelPage: React.FC = () => {
   const [form, setForm] = useState<{
     title: string;
     video: File | null;
+    thumbnail: File | null;
   }>({
     title: "",
     video: null,
+    thumbnail: null,
   });
 
   const openAdd = () => {
-    setForm({
-      title: "",
-      video: null,
-    });
+    setForm({ title: "", video: null, thumbnail: null });
     setIsAddOpen(true);
   };
 
   const openEdit = (reel: Reel) => {
     setSelectedReel(reel);
-    setForm({
-      title: reel.title,
-      video: null,
-    });
+    setForm({ title: reel.title, video: null, thumbnail: null });
     setIsEditOpen(true);
   };
 
@@ -65,10 +62,14 @@ const ReelPage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    if (!form.title || !form.video) return;
+    if (!form.title || !form.video || !form.thumbnail) return;
 
     addReel.mutate(
-      { title: form.title, video: form.video },
+      {
+        title: form.title,
+        video: form.video,
+        thumbnail: form.thumbnail,
+      },
       {
         onSuccess() {
           setIsAddOpen(false);
@@ -87,6 +88,7 @@ const ReelPage: React.FC = () => {
         reelData: {
           title: form.title,
           video: form.video || undefined,
+          thumbnail: form.thumbnail || undefined,
         },
       },
       {
@@ -99,7 +101,8 @@ const ReelPage: React.FC = () => {
   };
 
   const handleDelete = () => {
-    if (!selectedReel || !selectedReel._id) return;
+    if (!selectedReel) return;
+
     deleteReel.mutate(selectedReel._id, {
       onSuccess() {
         setIsDeleteOpen(false);
@@ -108,142 +111,109 @@ const ReelPage: React.FC = () => {
     });
   };
 
-  const hasReel = reels && reels.length > 0;
-
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Motion Reel</h1>
-        <Button onClick={openAdd}>
-          Add New Reel
-        </Button>
+    <div className="p-4 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Motion Reels</h1>
+        <Button onClick={openAdd}>Add New Reel</Button>
       </div>
 
-      {isLoading && (
-        <div className="space-y-2">
-          <div className="h-6 w-full bg-slate-200 animate-pulse" />
-          <div className="h-6 w-full bg-slate-200 animate-pulse" />
-          <div className="h-6 w-full bg-slate-200 animate-pulse" />
-        </div>
-      )}
+      {isLoading && <p>Loading...</p>}
+      {isError && <p className="text-red-500">Failed to load reels</p>}
 
-      {isError && <div className="text-red-500">Failed to load reels</div>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {reels?.map((reel: Reel) => (
+          <Card key={reel._id} className="p-4 space-y-3">
+            <div className="aspect-video rounded overflow-hidden bg-black">
+              <img
+                src={reel.thumbnail}
+                alt={reel.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
 
-      {!isLoading && !isError && reels?.length === 0 && (
-        <div className="text-gray-600">No reels found. Please add one.</div>
-      )}
+            <h3 className="font-semibold">{reel.title}</h3>
 
-      {!isLoading && !isError && reels?.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {reels.map((reel: Reel) => (
-            <Card key={reel._id} className="p-4 flex flex-col gap-4">
-              <div className="aspect-video bg-black rounded-md overflow-hidden">
-                <video
-                  src={reel.reel}
-                  className="w-full h-full object-cover"
-                  controls
-                />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">{reel.title}</h3>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => openEdit(reel)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => openDelete(reel)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => openEdit(reel)}>
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => openDelete(reel)}
+              >
+                Delete
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
 
-      {/* DIALOGS */}
-      {[
-        {
-          open: isAddOpen,
-          setOpen: setIsAddOpen,
-          title: "Add Reel",
-          onSave: handleAdd,
-        },
-        {
-          open: isEditOpen,
-          setOpen: setIsEditOpen,
-          title: "Edit Reel",
-          onSave: handleUpdate,
-        },
-        {
-          open: isDeleteOpen,
-          setOpen: setIsDeleteOpen,
-          title: "Confirm Delete",
-          onSave: handleDelete,
-        },
-      ].map(({ open, setOpen, title, onSave }, idx) => (
-        <Dialog key={idx} open={open} onOpenChange={setOpen}>
-          <DialogContent className="w-full max-w-full sm:max-w-md">
+      {/* Dialogs */}
+      {[{
+        open: isAddOpen,
+        setOpen: setIsAddOpen,
+        title: "Add Reel",
+        onSave: handleAdd,
+      }, {
+        open: isEditOpen,
+        setOpen: setIsEditOpen,
+        title: "Edit Reel",
+        onSave: handleUpdate,
+      }, {
+        open: isDeleteOpen,
+        setOpen: setIsDeleteOpen,
+        title: "Confirm Delete",
+        onSave: handleDelete,
+      }].map(({ open, setOpen, title, onSave }, i) => (
+        <Dialog key={i} open={open} onOpenChange={setOpen}>
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
             </DialogHeader>
 
             {title !== "Confirm Delete" ? (
-              <div className="space-y-4 p-1">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Title</label>
-                  <Input
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm({ ...form, title: e.target.value })
-                    }
-                    placeholder="e.g. My Motion Reel 2024"
-                  />
-                </div>
+              <div className="space-y-4">
+                <Input
+                  placeholder="Title"
+                  value={form.title}
+                  onChange={(e) =>
+                    setForm({ ...form, title: e.target.value })
+                  }
+                />
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Video File{" "}
-                    {title === "Edit Reel" && "(Leave empty to keep current)"}
-                  </label>
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        video: e.target.files ? e.target.files[0] : null,
-                      })
-                    }
-                  />
-                </div>
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      video: e.target.files?.[0] || null,
+                    })
+                  }
+                />
+
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      thumbnail: e.target.files?.[0] || null,
+                    })
+                  }
+                />
               </div>
             ) : (
-              <p>
-                Are you sure you want to delete the reel "{selectedReel?.title}
-                "?
-              </p>
+              <p>Delete "{selectedReel?.title}"?</p>
             )}
 
-            <DialogFooter className="flex justify-end gap-2 mt-4">
+            <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                onClick={onSave}
-                disabled={title === "Add Reel" && (!form.title || !form.video)}
-              >
-                {title === "Confirm Delete" ? "Delete" : "Save"}
-              </Button>
+              <Button onClick={onSave}>Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
