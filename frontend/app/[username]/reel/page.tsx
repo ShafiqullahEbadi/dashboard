@@ -23,7 +23,7 @@ interface Reel {
   title: string;
   reel: string;
   thumbnail: string;
-  description?: string; // ✅ added
+  description?: string;
 }
 
 const ReelPage: React.FC = () => {
@@ -34,7 +34,6 @@ const ReelPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   const [playingId, setPlayingId] = useState<string | null>(null);
-
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -44,7 +43,7 @@ const ReelPage: React.FC = () => {
     title: string;
     video: File | null;
     thumbnail: File | null;
-    description: string; // ✅ added
+    description: string;
   }>({
     title: "",
     video: null,
@@ -81,7 +80,7 @@ const ReelPage: React.FC = () => {
         title: form.title,
         video: form.video,
         thumbnail: form.thumbnail,
-        description: form.description, // ✅ include
+        description: form.description,
       },
       {
         onSuccess() {
@@ -102,7 +101,7 @@ const ReelPage: React.FC = () => {
           title: form.title,
           video: form.video || undefined,
           thumbnail: form.thumbnail || undefined,
-          description: form.description || undefined, // ✅ include
+          description: form.description || undefined,
         },
       },
       {
@@ -138,7 +137,6 @@ const ReelPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {reels?.map((reel: Reel) => (
           <Card key={reel._id} className="p-4 space-y-3">
-            {/* PLAYABLE THUMBNAIL */}
             <div className="aspect-video rounded overflow-hidden bg-black relative">
               {playingId === reel._id ? (
                 <video
@@ -155,8 +153,6 @@ const ReelPage: React.FC = () => {
                     alt={reel.title}
                     className="w-full h-full object-cover"
                   />
-
-                  {/* Play overlay */}
                   <button
                     onClick={() => setPlayingId(reel._id)}
                     className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition"
@@ -170,8 +166,6 @@ const ReelPage: React.FC = () => {
             </div>
 
             <h3 className="font-semibold">{reel.title}</h3>
-
-            {/* ✅ Show description */}
             {reel.description && (
               <p className="text-gray-600 text-sm">{reel.description}</p>
             )}
@@ -202,7 +196,7 @@ const ReelPage: React.FC = () => {
           <DialogContent className="w-full max-w-md p-6 space-y-4">
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
-              <DialogDescription id="dialog-description">
+              <DialogDescription>
                 {title === "Confirm Delete"
                   ? `Are you sure you want to delete "${selectedReel?.title}"?`
                   : "Fill out the details below"}
@@ -210,16 +204,12 @@ const ReelPage: React.FC = () => {
             </DialogHeader>
 
             {title !== "Confirm Delete" && (
-              <div
-                className="flex flex-col gap-4"
-                aria-describedby="dialog-description"
-              >
+              <>
                 <Input
                   placeholder="Title"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
-
                 <Textarea
                   placeholder="Description"
                   value={form.description}
@@ -227,7 +217,6 @@ const ReelPage: React.FC = () => {
                     setForm({ ...form, description: e.target.value })
                   }
                 />
-
                 <Input
                   type="file"
                   accept="video/*"
@@ -235,7 +224,6 @@ const ReelPage: React.FC = () => {
                     setForm({ ...form, video: e.target.files?.[0] || null })
                   }
                 />
-
                 <Input
                   type="file"
                   accept="image/*"
@@ -243,16 +231,14 @@ const ReelPage: React.FC = () => {
                     setForm({ ...form, thumbnail: e.target.files?.[0] || null })
                   }
                 />
-              </div>
+              </>
             )}
 
             <DialogFooter className="flex gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+              <Button variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={title === "Confirm Delete" ? handleDelete : handleAdd}>
-                {title === "Confirm Delete" ? "Delete" : "Save"}
-              </Button>
+              <Button onClick={onSave}>{title === "Confirm Delete" ? "Delete" : "Save"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
