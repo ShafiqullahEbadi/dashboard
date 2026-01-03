@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -198,19 +199,25 @@ const ReelPage: React.FC = () => {
         { open: isDeleteOpen, setOpen: setIsDeleteOpen, title: "Confirm Delete", onSave: handleDelete },
       ].map(({ open, setOpen, title, onSave }, idx) => (
         <Dialog key={idx} open={open} onOpenChange={setOpen}>
-          <DialogContent className="space-y-4 max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full max-w-md p-6 space-y-4">
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
+              <DialogDescription id="dialog-description">
+                {title === "Confirm Delete"
+                  ? `Are you sure you want to delete "${selectedReel?.title}"?`
+                  : "Fill out the details below"}
+              </DialogDescription>
             </DialogHeader>
 
-            {title !== "Confirm Delete" ? (
-              <div className="space-y-4">
+            {title !== "Confirm Delete" && (
+              <div
+                className="flex flex-col gap-4"
+                aria-describedby="dialog-description"
+              >
                 <Input
                   placeholder="Title"
                   value={form.title}
-                  onChange={(e) =>
-                    setForm({ ...form, title: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
 
                 <Textarea
@@ -219,17 +226,13 @@ const ReelPage: React.FC = () => {
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
-                  className="resize-none" // optional
                 />
 
                 <Input
                   type="file"
                   accept="video/*"
                   onChange={(e) =>
-                    setForm({
-                      ...form,
-                      video: e.target.files?.[0] || null,
-                    })
+                    setForm({ ...form, video: e.target.files?.[0] || null })
                   }
                 />
 
@@ -237,22 +240,17 @@ const ReelPage: React.FC = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) =>
-                    setForm({
-                      ...form,
-                      thumbnail: e.target.files?.[0] || null,
-                    })
+                    setForm({ ...form, thumbnail: e.target.files?.[0] || null })
                   }
                 />
               </div>
-            ) : (
-              <p>Are you sure you want to delete "{selectedReel?.title}"?</p>
             )}
 
-            <DialogFooter className="flex gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>
+            <DialogFooter className="flex gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAddOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={onSave}>
+              <Button onClick={title === "Confirm Delete" ? handleDelete : handleAdd}>
                 {title === "Confirm Delete" ? "Delete" : "Save"}
               </Button>
             </DialogFooter>
