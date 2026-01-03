@@ -5,6 +5,7 @@ export type ReelCreateData = {
   title: string;
   video: File;
   thumbnail: File;
+  description: string;
 };
 
 const useAddReel = () => {
@@ -12,6 +13,7 @@ const useAddReel = () => {
     mutationFn: (data: ReelCreateData) => {
       const formData = new FormData();
       formData.append("title", data.title);
+      formData.append("description", data.description);
       formData.append("reel", data.video);
       formData.append("thumbnail", data.thumbnail);
 

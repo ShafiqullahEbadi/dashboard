@@ -13,13 +13,13 @@ export const getReelController = async (req, res) => {
 
 export const createReelController = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, description } = req.body;
     const videoFile = req.files?.reel?.[0];
     const thumbFile = req.files?.thumbnail?.[0];
 
-    if (!title || !videoFile || !thumbFile) {
+    if (!title || !videoFile || !thumbFile | !description) {
       return res.status(400).json({
-        message: "Title, reel video, and thumbnail are required",
+        message: "Title, reel video, description, and thumbnail are required",
       });
     }
 
@@ -56,6 +56,7 @@ export const createReelController = async (req, res) => {
 
     const newReel = await Reel.create({
       title,
+      description,
       reel: videoResult.secure_url,
       thumbnail: thumbResult.secure_url,
     });
@@ -69,7 +70,7 @@ export const createReelController = async (req, res) => {
 
 export const updateReelController = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, description } = req.body;
     const videoFile = req.files?.reel?.[0];
     const thumbFile = req.files?.thumbnail?.[0];
 
@@ -77,6 +78,8 @@ export const updateReelController = async (req, res) => {
     if (!reel) return res.status(404).json({ message: "Reel not found" });
 
     if (title) reel.title = title;
+
+    if (description) reel.description = description;
 
     if (videoFile) {
       const videoUpload = await new Promise((resolve, reject) => {

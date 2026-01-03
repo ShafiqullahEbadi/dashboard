@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import useGetReel from "@/hooks/use-get-reel";
 import useAddReel from "@/hooks/use-add-reel";
@@ -21,6 +22,7 @@ interface Reel {
   title: string;
   reel: string;
   thumbnail: string;
+  description?: string; // ✅ added
 }
 
 const ReelPage: React.FC = () => {
@@ -41,20 +43,27 @@ const ReelPage: React.FC = () => {
     title: string;
     video: File | null;
     thumbnail: File | null;
+    description: string; // ✅ added
   }>({
     title: "",
     video: null,
     thumbnail: null,
+    description: "",
   });
 
   const openAdd = () => {
-    setForm({ title: "", video: null, thumbnail: null });
+    setForm({ title: "", video: null, thumbnail: null, description: "" });
     setIsAddOpen(true);
   };
 
   const openEdit = (reel: Reel) => {
     setSelectedReel(reel);
-    setForm({ title: reel.title, video: null, thumbnail: null });
+    setForm({
+      title: reel.title,
+      video: null,
+      thumbnail: null,
+      description: reel.description || "",
+    });
     setIsEditOpen(true);
   };
 
@@ -71,6 +80,7 @@ const ReelPage: React.FC = () => {
         title: form.title,
         video: form.video,
         thumbnail: form.thumbnail,
+        description: form.description, // ✅ include
       },
       {
         onSuccess() {
@@ -91,6 +101,7 @@ const ReelPage: React.FC = () => {
           title: form.title,
           video: form.video || undefined,
           thumbnail: form.thumbnail || undefined,
+          description: form.description || undefined, // ✅ include
         },
       },
       {
@@ -159,6 +170,11 @@ const ReelPage: React.FC = () => {
 
             <h3 className="font-semibold">{reel.title}</h3>
 
+            {/* ✅ Show description */}
+            {reel.description && (
+              <p className="text-gray-600 text-sm">{reel.description}</p>
+            )}
+
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => openEdit(reel)}>
                 Edit
@@ -194,6 +210,14 @@ const ReelPage: React.FC = () => {
                   value={form.title}
                   onChange={(e) =>
                     setForm({ ...form, title: e.target.value })
+                  }
+                />
+
+                <Textarea
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
                   }
                 />
 
